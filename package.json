@@ -1,0 +1,25 @@
+{
+  "name": "car-flat-scrapper",
+  "version": "1.0.0",
+  "description": "",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "start": "node .",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DevoRia/car-flat-scrapper.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/DevoRia/car-flat-scrapper/issues"
+  },
+  "homepage": "https://github.com/DevoRia/car-flat-scrapper#readme",
+  "dependencies": {
+    "mongoose": "^6.0.14",
+    "selenium-webdriver": "^4.1.0"
+  }
+}
