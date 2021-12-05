@@ -47,8 +47,10 @@ export class Autoria {
 
         if (updateStatus === 'new') {
           await saveCar(data)
+          return updateStatus;
         } else {
-          await updateCar(Object.assign(updateStatus, data))
+          await updateCar(updateStatus, data)
+          return 'upd';
         }
       }));
 

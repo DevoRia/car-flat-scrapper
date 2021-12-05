@@ -1,6 +1,6 @@
 import mongoose, {Schema} from 'mongoose'
 
-const Car = mongoose.model('Car', new Schema({
+const definition = {
   id: String,
   title: String,
   viewTitle: String,
@@ -14,7 +14,18 @@ const Car = mongoose.model('Car', new Schema({
   fuel: String,
   transmission: String,
   description: String
-}, {
+};
+
+const Car = mongoose.model('Car', new Schema(definition, {
+  timestamps: true
+}));
+const CarUpdate = mongoose.model('CarUpdate', new Schema(
+  {...definition,
+    parent: {
+      type: Schema.Types.ObjectId,
+      ref: 'Car'
+    }
+  }, {
   timestamps: true
 }));
 
@@ -22,8 +33,15 @@ export async function saveCar(data) {
   return await new Car(data).save();
 }
 
-export async function updateCar(car) {
-  return await car.save();
+export async function updateCar(parent, data) {
+  Object.keys(data)
+    .filter(key => parent[key] === data[key])
+    .map(key => {
+      data[key] = undefined;
+    });
+
+  await Object.assign(parent, { dateUpdate: data.dateUpdate }).save();
+  return await new CarUpdate({...data, parent}).save();
 }
 
 export async function checkForUpdate(id, dateUpdate) {
