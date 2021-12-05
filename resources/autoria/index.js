@@ -1,21 +1,15 @@
 import {By} from "selenium-webdriver";
+import {checkForUpdate, saveCar, updateCar} from "../../database/models/car.js";
 
 export class Autoria {
-
-  model = {
-    provider: 'autoria',
-    title: '',
-    link: '',
-    id: '',
-  }
 
   url = 'https://auto.ria.com'
   filter = ''
   driver;
 
   LIST_ELEMENTS = '//div[@class="content-bar"]'
-  TITLE = "//div[@class='content']/div[@class='head-ticket']//a"  //title & link & (id in link)
-  PRICE_USD = "//div[@class='content']/div[@class='price-ticket']"  //data-main-currency data-main-price
+  TITLE = "//div[@class='content']/div[@class='head-ticket']//a"
+  PRICE_USD = "//div[@class='content']/div[@class='price-ticket']"
   PRICE_UAH = '//div[@class="content"]/div[@class="price-ticket"]//span[@data-currency="UAH"]'
   RACE = '//div[@class="definition-data"]//li[contains(@class,"js-race")]'
   LOCATION = '//div[@class="definition-data"]//li[contains(@class,"js-location")]'
@@ -35,16 +29,27 @@ export class Autoria {
 
       return await Promise.all(listItems.map(async (_, i) => {
         const titleData = await this.parseTitleData(i);
+
+        const updateStatus = await checkForUpdate(titleData.id, titleData.dateUpdate);
+
+        if (!updateStatus) {
+          return;
+        }
+
         const priceData = await this.parsePrice(i);
         const options = await this.parseOptions(i);
 
-        const a =  {
+        const data = {
           ...titleData,
           ...priceData,
           ...options,
         }
-        console.log(a, 'AAAA');
-        return a;
+
+        if (updateStatus === 'new') {
+          await saveCar(data)
+        } else {
+          await updateCar(Object.assign(updateStatus, data))
+        }
       }));
 
 
