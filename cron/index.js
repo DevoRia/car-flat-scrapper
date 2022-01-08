@@ -1,5 +1,6 @@
 import {Autoria} from "../resources/autoria";
 import {getDriver} from "../driver/driver";
+import {Rst} from "../resources/rst";
 
 const CronJob = require('cron').CronJob;
 
@@ -9,8 +10,9 @@ export function runJobs() {
   const job = new CronJob('*/30 * * * *', async function() {
     console.log('RUN JOB:', new Date())
     driver = getDriver();
-    const results = await new Autoria(driver).parse();
-    console.log(calculateResults(results), new Date())
+    const resultsAr = await new Autoria(driver).parse();
+    const resultsRst = await new Rst(driver).parse();
+    console.log(calculateResults(resultsAr.concat(resultsRst)), new Date())
     await driver.quit();
   });
   job.start();

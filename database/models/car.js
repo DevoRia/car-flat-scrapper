@@ -1,7 +1,13 @@
 import mongoose, {Schema} from 'mongoose'
 
+export const providers = [
+  'autoria',
+  'rst',
+]
+
 const definition = {
   id: String,
+  provider: { type: String, enum: providers },
   title: String,
   viewTitle: String,
   link: String,
