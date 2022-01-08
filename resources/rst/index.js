@@ -1,10 +1,10 @@
 import {By} from "selenium-webdriver";
-import {saveCar} from "../../database/models/car.js";
+import {checkForUpdate, saveCar} from "../../database/models/car.js";
 
 export class Rst {
 
   url = 'https://rst.ua'
-  filter = ''
+  filter = process.env.RST_FILTER;
   driver;
 
   LIST_ELEMENTS = '//div[contains(@class,"rst-ocb-i rst-ocb-i-premium rst-uix-radius roiv")]|//div[contains(@class,"rst-ocb-i roiv")]'
@@ -30,6 +30,12 @@ export class Rst {
         const priceData = await this.parsePrice(i);
         const options = await this.parseOptions(i);
 
+        const updateStatus = await checkForUpdate(titleData.id, titleData.dateUpdate);
+
+        if (!updateStatus) {
+          return;
+        }
+
         const data = {
           provider: 'rst',
           ...titleData,
@@ -38,7 +44,7 @@ export class Rst {
         }
 
         await saveCar(data)
-        return 'new';
+        return updateStatus;
       }))
 
     } catch (e) {

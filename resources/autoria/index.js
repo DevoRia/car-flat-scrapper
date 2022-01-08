@@ -4,7 +4,7 @@ import {checkForUpdate, saveCar, updateCar} from "../../database/models/car.js";
 export class Autoria {
 
   url = 'https://auto.ria.com'
-  filter = ''
+  filter = process.env.AUTORIA_FILTER;
   driver;
 
   LIST_ELEMENTS = '//div[@class="content-bar"]'
@@ -40,6 +40,7 @@ export class Autoria {
         const options = await this.parseOptions(i);
 
         const data = {
+          provider: 'autoria',
           ...titleData,
           ...priceData,
           ...options,

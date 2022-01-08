@@ -55,7 +55,7 @@ export async function checkForUpdate(id, dateUpdate) {
   if (!car) {
     return 'new';
   } else {
-    if (new Date(car.dateUpdate).getTime() === new Date(dateUpdate).getTime()) {
+    if (!dateUpdate || (new Date(car.dateUpdate).getTime() === new Date(dateUpdate).getTime())) {
       return undefined;
     } else {
       return car;
