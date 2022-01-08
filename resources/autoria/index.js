@@ -57,7 +57,7 @@ export class Autoria {
 
     } catch (e) {
       console.error(e);
-      return e
+      return [];
     }
   }
 

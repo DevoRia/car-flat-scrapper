@@ -11,7 +11,7 @@ export function runJobs() {
     driver = getDriver();
     const results = await new Autoria(driver).parse();
     console.log(calculateResults(results), new Date())
-    driver.quit();
+    await driver.quit();
   });
   job.start();
 }
