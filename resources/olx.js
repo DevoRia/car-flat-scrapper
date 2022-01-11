@@ -35,8 +35,6 @@ export class Olx extends Resource {
       ...options,
     }
 
-    console.log(data);
-
     if (updateStatus === 'new') {
       await this.repository.save(data)
       return updateStatus;
@@ -73,7 +71,7 @@ export class Olx extends Resource {
     const date = await dateEl.getText();
 
     return {
-      priceUah: Number(price.replace(/ /g, '').replace(/'/g, '').replace("грн.", '')),
+      uah: Number(price.replace(/ /g, '').replace(/'/g, '').replace("грн.", '')),
       location,
       dateCreate: date,
       dateUpdate: date,
