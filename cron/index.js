@@ -1,6 +1,7 @@
 import {getDriver} from "../driver/driver";
 import {AutoRia} from "../resources/autoria";
 import {Rst} from "../resources/rst";
+import {Olx} from "../resources/olx";
 
 const CronJob = require('cron').CronJob;
 
@@ -30,7 +31,7 @@ async function jobFn() {
   console.log('RUN JOB:', new Date())
   driver = getDriver();
 
-  const count = await [AutoRia, Rst]
+  const count = await [AutoRia, Rst, Olx]
       .reduce((promise, resource) => promise
           .then(async (result) => {
             const currentResult = await new resource(driver).parse();

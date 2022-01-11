@@ -11,8 +11,8 @@ const definition = {
   title: String,
   viewTitle: String,
   link: String,
-  dateUpdate: Date,
-  dateCreate: Date,
+  dateUpdate: String,
+  dateCreate: String,
   uah: Number,
   location: String,
   description: String
