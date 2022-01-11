@@ -1,8 +1,8 @@
 import mongoose, {Schema} from 'mongoose'
 
 export const providers = [
-  'autoria',
-  'rst',
+  'domria',
+  'olx',
 ]
 
 const definition = {
@@ -13,27 +13,25 @@ const definition = {
   link: String,
   dateUpdate: Date,
   dateCreate: Date,
-  usd: Number,
   uah: Number,
-  race: Number,
   location: String,
-  fuel: String,
-  transmission: String,
   description: String
 };
 
-export const Car = mongoose.model(process.env.CAR_MODEL, new Schema(definition, {
-  timestamps: true
-}));
-
-export const CarUpdate = mongoose.model(process.env.CAR_UPDATE_MODEL, new Schema(
+export const Flat = mongoose.model(process.env.FLAT_MODEL,
+  new Schema(definition, {
+    timestamps: true
+  })
+);
+export const FlatUpdate = mongoose.model(process.env.FLAT_UPDATE_MODEL, new Schema(
   {...definition,
     parent: {
       type: Schema.Types.ObjectId,
-      ref: process.env.CAR_MODEL
+      ref: process.env.FLAT_MODEL
     }
   }, {
-  timestamps: true
-}));
+    timestamps: true
+  })
+);
 
 

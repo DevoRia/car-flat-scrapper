@@ -1,7 +1,8 @@
 import {By} from "selenium-webdriver";
-import {checkForUpdate, saveCar, updateCar} from "../../database/models/car.js";
+import {Resource} from "./resource";
+import {Car, CarUpdate} from "../database/models/car";
 
-export class Autoria {
+export class AutoRia extends Resource {
 
   url = 'https://auto.ria.com'
   filter = process.env.AUTORIA_FILTER;
@@ -19,47 +20,35 @@ export class Autoria {
   DATE = '//div[@class="footer_ticket"]/span'
 
   constructor(driver) {
-    this.driver = driver;
+    super(driver, Car, CarUpdate);
   }
 
-  async parse() {
-    try {
-      await this.driver.get(this.url + this.filter)
-      const listItems = await this.driver.findElements(By.xpath(this.LIST_ELEMENTS));
+  async parseElement(_, i) {
+      const titleData = await this.parseTitleData(i);
 
-      return await Promise.all(listItems.map(async (_, i) => {
-        const titleData = await this.parseTitleData(i);
+      const updateStatus = await this.repository.checkForUpdate(titleData.id, titleData.dateUpdate);
 
-        const updateStatus = await checkForUpdate(titleData.id, titleData.dateUpdate);
+      if (!updateStatus) {
+        return;
+      }
 
-        if (!updateStatus) {
-          return;
-        }
+      const priceData = await this.parsePrice(i);
+      const options = await this.parseOptions(i);
 
-        const priceData = await this.parsePrice(i);
-        const options = await this.parseOptions(i);
+      const data = {
+        provider: 'autoria',
+        ...titleData,
+        ...priceData,
+        ...options,
+      }
 
-        const data = {
-          provider: 'autoria',
-          ...titleData,
-          ...priceData,
-          ...options,
-        }
-
-        if (updateStatus === 'new') {
-          await saveCar(data)
-          return updateStatus;
-        } else {
-          await updateCar(updateStatus, data)
-          return 'upd';
-        }
-      }));
-
-
-    } catch (e) {
-      console.error(e);
-      return [];
-    }
+      if (updateStatus === 'new') {
+        await this.repository.save(data)
+        return updateStatus;
+      } else {
+        await this.repository.update(updateStatus, data)
+        return 'upd';
+      }
   }
 
   async parseTitleData(i) {
@@ -89,7 +78,6 @@ export class Autoria {
     const priceUsdEl = await this.driver.findElement(By.xpath(`(${this.PRICE_USD})[${i + 1}]`));
     const priceUahEl = await this.driver.findElement(By.xpath(`(${this.PRICE_UAH})[${i + 1}]`));
 
-    const mainCurrency = await priceUsdEl.getAttribute('data-main-currency');
     const mainPrice = Number(await priceUsdEl.getAttribute('data-main-price'));
     const uah = Number((await priceUahEl.getText()).replace(' ', ''));
 

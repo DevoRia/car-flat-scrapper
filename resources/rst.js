@@ -1,7 +1,8 @@
 import {By} from "selenium-webdriver";
-import {checkForUpdate, saveCar} from "../../database/models/car.js";
+import {Resource} from "./resource";
+import {Car, CarUpdate} from "../database/models/car";
 
-export class Rst {
+export class Rst extends Resource {
 
   url = 'https://rst.ua'
   filter = process.env.RST_FILTER;
@@ -11,46 +12,33 @@ export class Rst {
   TITLE = "//div[contains(@class,'rst-ocb-i')]/a[@class='rst-ocb-i-a']"
   PRICE_USD = '//span[@class="rst-uix-grey"]'
   PRICE_UAH = "//span[contains(@class,'rst-ocb-i-d-l-i-s rst-ocb-i-d-l-i-s-p')]"
-  RACE = "//li[@class='rst-ocb-i-d-l-i'][contains(text(),'Год:')]"
   LOCATION = '//span[@class="rst-ocb-i-d-l-i-s"]/strong'
   DESCRIPTION = '//div[@class="rst-ocb-i-d-d"]'
-  DATE = '//div[@class="rst-ocb-i-s"]/i|//div[@class="rst-ocb-i-s"]/b[@class=" rst-ocb-i-s-fresh"]'
 
   constructor(driver) {
-    this.driver = driver;
+    super(driver, Car, CarUpdate)
   }
 
-  async parse() {
-    try {
-      await this.driver.get(this.url + this.filter)
-      const listItems = await this.driver.findElements(By.xpath(this.LIST_ELEMENTS));
+  async parseElement(_, i) {
+    const titleData = await this.parseTitleData(i);
+    const priceData = await this.parsePrice(i);
+    const options = await this.parseOptions(i);
 
-      return await Promise.all(listItems.map(async (_, i) => {
-        const titleData = await this.parseTitleData(i);
-        const priceData = await this.parsePrice(i);
-        const options = await this.parseOptions(i);
+    const updateStatus = await this.repository.checkForUpdate(titleData.id, titleData.dateUpdate);
 
-        const updateStatus = await checkForUpdate(titleData.id, titleData.dateUpdate);
-
-        if (!updateStatus) {
-          return;
-        }
-
-        const data = {
-          provider: 'rst',
-          ...titleData,
-          ...priceData,
-          ...options,
-        }
-
-        await saveCar(data)
-        return updateStatus;
-      }))
-
-    } catch (e) {
-      console.error(e);
-      return [];
+    if (!updateStatus) {
+      return;
     }
+
+    const data = {
+      provider: 'rst',
+      ...titleData,
+      ...priceData,
+      ...options,
+    }
+
+    await this.repository.save(data)
+    return updateStatus;
   }
 
   async parseTitleData(i) {
@@ -84,11 +72,8 @@ export class Rst {
   }
 
   async parseOptions(i) {
-    const raceEl = await this.driver.findElement(By.xpath(`(${this.RACE})[${i + 1}]`));
     const locationEl = await this.driver.findElement(By.xpath(`(${this.LOCATION})[${i + 1}]`));
     const descriptionEl = await this.driver.findElement(By.xpath(`(${this.DESCRIPTION})[${i + 1}]`));
-
-    const race = Number((await raceEl.getText()).match('\(([0-9].*?)\)')[0].replace('(', '').replace(' - пробег)', ''));
     const location = await locationEl.getText();
     const description = await descriptionEl.getText();
 

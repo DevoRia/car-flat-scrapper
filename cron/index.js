@@ -1,5 +1,5 @@
-import {Autoria} from "../resources/autoria";
 import {getDriver} from "../driver/driver";
+import {AutoRia} from "../resources/autoria";
 import {Rst} from "../resources/rst";
 
 const CronJob = require('cron').CronJob;
@@ -7,15 +7,12 @@ const CronJob = require('cron').CronJob;
 let driver;
 
 export function runJobs() {
-  const job = new CronJob('*/30 * * * *', async function() {
-    console.log('RUN JOB:', new Date())
-    driver = getDriver();
-    const resultsAr = await new Autoria(driver).parse();
-    const resultsRst = await new Rst(driver).parse();
-    console.log(calculateResults(resultsAr.concat(resultsRst)), new Date())
-    await driver.quit();
-  });
-  job.start();
+  if (process.env.CRONLESS) {
+    jobFn().then(() => process.exit(0));
+  } else {
+    const job = new CronJob('*/30 * * * *', jobFn);
+    job.start();
+  }
 }
 
 
@@ -27,4 +24,20 @@ function calculateResults(results) {
     created,
     updated
   }
+}
+
+async function jobFn() {
+  console.log('RUN JOB:', new Date())
+  driver = getDriver();
+
+  const count = await [AutoRia, Rst]
+      .reduce((promise, resource) => promise
+          .then(async (result) => {
+            const currentResult = await new resource(driver).parse();
+            return result.concat(currentResult);
+          }),
+        Promise.resolve([]));
+
+  console.log(calculateResults(count), new Date())
+  await driver.quit();
 }
