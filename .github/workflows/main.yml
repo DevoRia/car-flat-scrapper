@@ -20,8 +20,4 @@ jobs:
         USERNAME: ${{ secrets.USERNAME }}
         PORT: ${{ secrets.PORT }}
         KEY: ${{ secrets.SSHKEY }}
-        script: |
-          cd ~/car-flat-scrapper
-          git pull
-          pm2 stop index.js
-          pm2 restart index.js
+        script: cd ~/car-flat-scrapper && git pull && pm2 stop index.js && pm2 restart index.js
