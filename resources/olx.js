@@ -38,9 +38,6 @@ export class Olx extends Resource {
     if (updateStatus === 'new') {
       await this.repository.save(data)
       return updateStatus;
-    } else {
-      await this.repository.update(updateStatus, data)
-      return 'upd';
     }
   }
 
