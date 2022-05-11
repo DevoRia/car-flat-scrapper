@@ -14,6 +14,7 @@ const definition = {
   dateUpdate: Date,
   dateCreate: Date,
   usd: Number,
+  photo: String,
   uah: Number,
   race: Number,
   location: String,

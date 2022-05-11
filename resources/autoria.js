@@ -10,6 +10,7 @@ export class AutoRia extends Resource {
 
   LIST_ELEMENTS = '//div[@class="content-bar"]'
   TITLE = "//div[@class='content']/div[@class='head-ticket']//a"
+  PHOTO = "//div[@class='ticket-photo loaded']//picture/img"
   PRICE_USD = "//div[@class='content']/div[@class='price-ticket']"
   PRICE_UAH = '//div[@class="content"]/div[@class="price-ticket"]//span[@data-currency="UAH"]'
   RACE = '//div[@class="definition-data"]//li[contains(@class,"js-race")]'
@@ -44,10 +45,10 @@ export class AutoRia extends Resource {
 
       if (updateStatus === 'new') {
         await this.repository.save(data)
-        return updateStatus;
+        return {status: updateStatus, data };
       } else {
         await this.repository.update(updateStatus, data)
-        return 'upd';
+        return {status: 'upd', data };
       }
   }
 
@@ -59,6 +60,15 @@ export class AutoRia extends Resource {
     const dateUpdate = await dateEl.getAttribute('data-update-date');
 
     const title = await titleEl.getAttribute('title');
+
+    let photo;
+
+    try {
+      const photoEl = await this.driver.findElement(By.xpath(`(${this.PHOTO})[${i + 1}]`));
+      photo = await photoEl.getAttribute('src') || '';
+    } catch (e) {
+      console.log(title, 'image error.');
+    }
     const viewTitle = await titleEl.getText();
     const link = await titleEl.getAttribute('href');
     const idMatcher = link.match('_[0-9]*\\.html');
@@ -69,6 +79,7 @@ export class AutoRia extends Resource {
       viewTitle,
       link,
       id,
+      photo,
       dateUpdate,
       dateCreate
     }
